@@ -2,6 +2,8 @@
 
 An online multiplayer Minesweeper game where two players take turns on a shared board. Built with FastAPI (Python) backend and vanilla HTML/CSS/JavaScript frontend.
 
+The game is hosted also on Render.com: https://duo-minesweeper.onrender.com/
+
 ## Features
 
 - **Two-player turn-based gameplay** on a shared Minesweeper board
