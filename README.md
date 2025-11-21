@@ -107,6 +107,40 @@ The frontend is served by the FastAPI backend.
    - Right-click to flag/unflag a cell
    - The game ends when a mine is hit (loss) or all non-mine cells are revealed (win)
 
+## Docker Deployment
+
+### Using Docker
+
+1. **Build the Docker image:**
+   ```bash
+   docker build -t minesweeper-game .
+   ```
+
+2. **Run the container:**
+   ```bash
+   docker run -p 8000:8000 minesweeper-game
+   ```
+
+3. **Using Docker Compose:**
+   ```bash
+   docker-compose up
+   ```
+
+   Or run in detached mode:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the application:**
+   Open your browser and navigate to `http://localhost:8000`
+
+### Docker Environment Variables
+
+You can customize the port and host by setting environment variables:
+```bash
+docker run -p 8000:8000 -e PORT=8000 -e HOST=0.0.0.0 minesweeper-game
+```
+
 ## Deployment
 
 ### Heroku
