@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Player Minesweeper</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Two-Player Minesweeper</h1>
+        </header>
+
+        <!-- Connection Status -->
+        <div id="connection-status" class="connection-status">
+            <span id="status-indicator" class="status-indicator disconnected"></span>
+            <span id="status-text">Disconnected</span>
+        </div>
+
+        <!-- Game Setup Section -->
+        <div id="setup-section" class="setup-section">
+            <div class="setup-card">
+                <h2>Create Game</h2>
+                <div class="name-input">
+                    <label>Your Name (optional):</label>
+                    <input type="text" id="create-player-name" placeholder="Enter your name">
+                </div>
+                <div class="game-mode-selector">
+                    <label>Game Mode:</label>
+                    <select id="game-mode-select">
+                        <option value="classic" selected>Classic (Game ends on mine)</option>
+                        <option value="survival">Survival (Switch turns on mine, track hits)</option>
+                    </select>
+                </div>
+                <div class="difficulty-selector">
+                    <label>Difficulty:</label>
+                    <select id="difficulty-select">
+                        <option value="easy">Easy (9x9, 10 mines)</option>
+                        <option value="medium" selected>Medium (16x16, 40 mines)</option>
+                        <option value="hard">Hard (16x30, 99 mines)</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div id="custom-difficulty-inputs" class="custom-difficulty-inputs hidden">
+                    <div class="custom-input-row">
+                        <label>Rows:</label>
+                        <input type="number" id="custom-rows" min="5" max="50" value="16" placeholder="Rows">
+                    </div>
+                    <div class="custom-input-row">
+                        <label>Columns:</label>
+                        <input type="number" id="custom-cols" min="5" max="50" value="16" placeholder="Columns">
+                    </div>
+                    <div class="custom-input-row">
+                        <label>Mines:</label>
+                        <input type="number" id="custom-mines" min="1" max="999" value="40" placeholder="Mines">
+                    </div>
+                    <div class="custom-input-hint">
+                        <small>Max: 50x50, Mines must be less than (rows × cols - 9)</small>
+                    </div>
+                </div>
+                <button id="create-game-btn" class="btn btn-primary">Create New Game</button>
+            </div>
+
+            <div class="setup-card">
+                <h2>Join Game</h2>
+                <div class="name-input">
+                    <label>Your Name (optional):</label>
+                    <input type="text" id="join-player-name" placeholder="Enter your name">
+                </div>
+                <input type="text" id="game-id-input" placeholder="Enter Game ID or paste link">
+                <button id="join-game-btn" class="btn btn-secondary">Join Game</button>
+            </div>
+        </div>
+
+        <!-- Game Section (hidden initially) -->
+        <div id="game-section" class="game-section hidden">
+            <div class="game-layout">
+                <!-- Left Side Panel - Player 1 Stats -->
+                <div id="player1-side-panel" class="side-panel left-panel">
+                    <div class="side-panel-header">
+                        <h3 id="player1-side-name">Player 1</h3>
+                    </div>
+                    <div class="side-panel-stats">
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">💥 Exploded Mines:</span>
+                            <span id="player1-exploded-mines" class="side-stat-value">0</span>
+                        </div>
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">🚩 Exposed Mines:</span>
+                            <span id="player1-exposed-mines" class="side-stat-value">0</span>
+                        </div>
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">🗺️ Land Explored:</span>
+                            <span id="player1-land-explored" class="side-stat-value">0</span>
+                        </div>
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">⏱️ Time Played:</span>
+                            <span id="player1-time" class="side-stat-value">0s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Game Area -->
+                <div class="game-center">
+                    <!-- Game Info -->
+                    <div class="game-info">
+                        <div class="info-item">
+                            <label>Mines:</label>
+                            <span id="mines-count">0</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Flags:</label>
+                            <span id="flags-count">0</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Time:</label>
+                            <span id="timer">0</span>
+                        </div>
+                    </div>
+
+            <!-- Share Link -->
+            <div class="share-section">
+                <label>Share this link:</label>
+                <div class="share-input-group">
+                    <input type="text" id="share-link" readonly>
+                    <button id="copy-link-btn" class="btn btn-small">Copy</button>
+                </div>
+            </div>
+
+            <!-- Players Info -->
+            <div class="players-info">
+                <div id="player1-info" class="player-info">
+                    <span class="player-name">Player 1</span>
+                    <span class="player-status" id="player1-status">Waiting...</span>
+                    <div id="player1-stats" class="player-stats hidden">
+                        <div class="stat-item">
+                            <span class="stat-label">Mines Hit:</span>
+                            <span id="player1-mines-hit" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Cells Revealed:</span>
+                            <span id="player1-cells-revealed" class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="player2-info" class="player-info">
+                    <span class="player-name">Player 2</span>
+                    <span class="player-status" id="player2-status">Not joined</span>
+                    <div id="player2-stats" class="player-stats hidden">
+                        <div class="stat-item">
+                            <span class="stat-label">Mines Hit:</span>
+                            <span id="player2-mines-hit" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Cells Revealed:</span>
+                            <span id="player2-cells-revealed" class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Turn Indicator -->
+            <div id="turn-indicator" class="turn-indicator">
+                <span id="turn-text">Waiting for players...</span>
+            </div>
+
+                    <!-- Game Board -->
+                    <div id="board-container" class="board-container">
+                        <div id="game-board" class="game-board"></div>
+                    </div>
+                    
+                    <!-- Exit Button -->
+                    <div class="exit-section">
+                        <button id="exit-game-btn" class="btn btn-secondary">Exit to Main Menu</button>
+                    </div>
+                </div>
+
+                <!-- Right Side Panel - Player 2 Stats -->
+                <div id="player2-side-panel" class="side-panel right-panel">
+                    <div class="side-panel-header">
+                        <h3 id="player2-side-name">Player 2</h3>
+                    </div>
+                    <div class="side-panel-stats">
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">💥 Exploded Mines:</span>
+                            <span id="player2-exploded-mines" class="side-stat-value">0</span>
+                        </div>
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">🚩 Exposed Mines:</span>
+                            <span id="player2-exposed-mines" class="side-stat-value">0</span>
+                        </div>
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">🗺️ Land Explored:</span>
+                            <span id="player2-land-explored" class="side-stat-value">0</span>
+                        </div>
+                        <div class="side-stat-item">
+                            <span class="side-stat-label">⏱️ Time Played:</span>
+                            <span id="player2-time" class="side-stat-value">0s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over GIF Display -->
+        <div id="game-over-display" class="game-over-display hidden">
+            <div class="game-over-content">
+                <h2 id="game-over-title"></h2>
+                <div id="game-over-gif-container">
+                    <img id="game-over-gif" src="" alt="Game Over">
+                </div>
+                <div class="game-over-buttons">
+                    <button id="play-again-btn" class="btn btn-primary">Play Again</button>
+                    <button id="close-game-over-btn" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="minesweeper.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
+
